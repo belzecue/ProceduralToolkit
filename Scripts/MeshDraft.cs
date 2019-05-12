@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Rendering;
 
 namespace ProceduralToolkit
 {
@@ -80,16 +81,20 @@ namespace ProceduralToolkit
         #region AddTriangle
 
         /// <summary>
-        /// Adds a triangle with normals to the draft
+        /// Adds a triangle to the draft
         /// </summary>
-        public MeshDraft AddTriangle(Vector3 vertex0, Vector3 vertex1, Vector3 vertex2)
+        public MeshDraft AddTriangle(Vector3 vertex0, Vector3 vertex1, Vector3 vertex2, bool calculateNormal)
         {
-            Vector3 normal = Vector3.Cross(vertex1 - vertex0, vertex2 - vertex0).normalized;
-            return AddTriangle(vertex0, vertex1, vertex2, normal, normal, normal);
+            if (calculateNormal)
+            {
+                Vector3 normal = Vector3.Cross(vertex1 - vertex0, vertex2 - vertex0).normalized;
+                return AddTriangle(vertex0, vertex1, vertex2, normal, normal, normal);
+            }
+            return _AddTriangle(vertex0, vertex1, vertex2);
         }
 
         /// <summary>
-        /// Adds a triangle with normals to the draft
+        /// Adds a triangle to the draft
         /// </summary>
         public MeshDraft AddTriangle(Vector3 vertex0, Vector3 vertex1, Vector3 vertex2, Vector3 normal)
         {
@@ -97,40 +102,33 @@ namespace ProceduralToolkit
         }
 
         /// <summary>
-        /// Adds a triangle with normals to the draft
+        /// Adds a triangle to the draft
         /// </summary>
-        public MeshDraft AddTriangle(Vector3 vertex0, Vector3 vertex1, Vector3 vertex2, Vector3 normal0, Vector3 normal1,
-            Vector3 normal2)
+        public MeshDraft AddTriangle(Vector3 vertex0, Vector3 vertex1, Vector3 vertex2, Vector3 normal0, Vector3 normal1, Vector3 normal2)
         {
-            triangles.Add(0 + vertices.Count);
-            triangles.Add(1 + vertices.Count);
-            triangles.Add(2 + vertices.Count);
-            vertices.Add(vertex0);
-            vertices.Add(vertex1);
-            vertices.Add(vertex2);
             normals.Add(normal0);
             normals.Add(normal1);
             normals.Add(normal2);
-            return this;
+            return _AddTriangle(vertex0, vertex1, vertex2);
         }
 
         /// <summary>
-        /// Adds a triangle with normals and uv coordinates to the draft
+        /// Adds a triangle to the draft
         /// </summary>
-        public MeshDraft AddTriangle(Vector3 vertex0, Vector3 vertex1, Vector3 vertex2, Vector2 uv0, Vector2 uv1,
-            Vector2 uv2)
+        public MeshDraft AddTriangle(Vector3 vertex0, Vector3 vertex1, Vector3 vertex2, bool calculateNormal,
+            Vector2 uv0, Vector2 uv1, Vector2 uv2)
         {
             uv.Add(uv0);
             uv.Add(uv1);
             uv.Add(uv2);
-            return AddTriangle(vertex0, vertex1, vertex2);
+            return AddTriangle(vertex0, vertex1, vertex2, calculateNormal);
         }
 
         /// <summary>
-        /// Adds a triangle with normals and uv coordinates to the draft
+        /// Adds a triangle to the draft
         /// </summary>
-        public MeshDraft AddTriangle(Vector3 vertex0, Vector3 vertex1, Vector3 vertex2, Vector3 normal, Vector2 uv0,
-            Vector2 uv1, Vector2 uv2)
+        public MeshDraft AddTriangle(Vector3 vertex0, Vector3 vertex1, Vector3 vertex2, Vector3 normal,
+            Vector2 uv0, Vector2 uv1, Vector2 uv2)
         {
             uv.Add(uv0);
             uv.Add(uv1);
@@ -139,10 +137,10 @@ namespace ProceduralToolkit
         }
 
         /// <summary>
-        /// Adds a triangle with normals and uv coordinates to the draft
+        /// Adds a triangle to the draft
         /// </summary>
-        public MeshDraft AddTriangle(Vector3 vertex0, Vector3 vertex1, Vector3 vertex2, Vector3 normal0, Vector3 normal1,
-            Vector3 normal2, Vector2 uv0, Vector2 uv1, Vector2 uv2)
+        public MeshDraft AddTriangle(Vector3 vertex0, Vector3 vertex1, Vector3 vertex2, Vector3 normal0, Vector3 normal1, Vector3 normal2,
+            Vector2 uv0, Vector2 uv1, Vector2 uv2)
         {
             uv.Add(uv0);
             uv.Add(uv1);
@@ -150,31 +148,53 @@ namespace ProceduralToolkit
             return AddTriangle(vertex0, vertex1, vertex2, normal0, normal1, normal2);
         }
 
+        private MeshDraft _AddTriangle(Vector3 vertex0, Vector3 vertex1, Vector3 vertex2)
+        {
+            triangles.Add(0 + vertices.Count);
+            triangles.Add(1 + vertices.Count);
+            triangles.Add(2 + vertices.Count);
+            vertices.Add(vertex0);
+            vertices.Add(vertex1);
+            vertices.Add(vertex2);
+            return this;
+        }
+
         #endregion AddTriangle
 
         #region AddQuad
 
         /// <summary>
-        /// Adds a quad with normals to the draft
+        /// Adds a quad to the draft
         /// </summary>
-        public MeshDraft AddQuad(Vector3 origin, Vector3 width, Vector3 height)
+        public MeshDraft AddQuad(Vector3 origin, Vector3 width, Vector3 height, bool calculateNormal)
         {
-            Vector3 normal = Vector3.Cross(height, width).normalized;
-            return AddQuad(origin, origin + height, origin + height + width, origin + width,
-                normal, normal, normal, normal);
+            Vector3 vertex0 = origin;
+            Vector3 vertex1 = origin + height;
+            Vector3 vertex2 = origin + height + width;
+            Vector3 vertex3 = origin + width;
+            if (calculateNormal)
+            {
+                Vector3 normal = Vector3.Cross(height, width).normalized;
+                return AddQuad(vertex0, vertex1, vertex2, vertex3, normal, normal, normal, normal);
+            }
+            return _AddQuad(vertex0, vertex1, vertex2, vertex3);
         }
 
         /// <summary>
-        /// Adds a quad with normals to the draft
+        /// Adds a quad to the draft
         /// </summary>
-        public MeshDraft AddQuad(Vector3 vertex0, Vector3 vertex1, Vector3 vertex2, Vector3 vertex3)
+        public MeshDraft AddQuad(Vector3 vertex0, Vector3 vertex1, Vector3 vertex2, Vector3 vertex3, bool calculateNormal)
         {
-            Vector3 normal = Vector3.Cross(vertex1 - vertex0, vertex3 - vertex0).normalized;
-            return AddQuad(vertex0, vertex1, vertex2, vertex3, normal, normal, normal, normal);
+            if (calculateNormal)
+            {
+                Vector3 normal = Vector3.Cross(vertex1 - vertex0, vertex3 - vertex0).normalized;
+                return AddQuad(vertex0, vertex1, vertex2, vertex3, normal, normal, normal, normal);
+            }
+            return _AddQuad(vertex0, vertex1, vertex2, vertex3);
         }
 
         /// <summary>
-        /// Adds a quad with normals to the draft
+        /// Adds a quad to the draft
         /// </summary>
         public MeshDraft AddQuad(Vector3 vertex0, Vector3 vertex1, Vector3 vertex2, Vector3 vertex3, Vector3 normal)
         {
@@ -182,56 +202,46 @@ namespace ProceduralToolkit
         }
 
         /// <summary>
-        /// Adds a quad with normals to the draft
+        /// Adds a quad to the draft
         /// </summary>
         public MeshDraft AddQuad(Vector3 vertex0, Vector3 vertex1, Vector3 vertex2, Vector3 vertex3,
             Vector3 normal0, Vector3 normal1, Vector3 normal2, Vector3 normal3)
         {
-            triangles.Add(0 + vertices.Count);
-            triangles.Add(1 + vertices.Count);
-            triangles.Add(2 + vertices.Count);
-            triangles.Add(0 + vertices.Count);
-            triangles.Add(2 + vertices.Count);
-            triangles.Add(3 + vertices.Count);
-            vertices.Add(vertex0);
-            vertices.Add(vertex1);
-            vertices.Add(vertex2);
-            vertices.Add(vertex3);
             normals.Add(normal0);
             normals.Add(normal1);
             normals.Add(normal2);
             normals.Add(normal3);
-            return this;
+            return _AddQuad(vertex0, vertex1, vertex2, vertex3);
         }
 
         /// <summary>
-        /// Adds a quad with normals and uv coordinates to the draft
+        /// Adds a quad to the draft
         /// </summary>
-        public MeshDraft AddQuad(Vector3 origin, Vector3 width, Vector3 height,
+        public MeshDraft AddQuad(Vector3 origin, Vector3 width, Vector3 height, bool calculateNormal,
             Vector2 uv0, Vector2 uv1, Vector2 uv2, Vector2 uv3)
         {
             uv.Add(uv0);
             uv.Add(uv1);
             uv.Add(uv2);
             uv.Add(uv3);
-            return AddQuad(origin, width, height);
+            return AddQuad(origin, width, height, calculateNormal);
         }
 
         /// <summary>
-        /// Adds a quad with normals and uv coordinates to the draft
+        /// Adds a quad to the draft
         /// </summary>
-        public MeshDraft AddQuad(Vector3 vertex0, Vector3 vertex1, Vector3 vertex2, Vector3 vertex3,
+        public MeshDraft AddQuad(Vector3 vertex0, Vector3 vertex1, Vector3 vertex2, Vector3 vertex3, bool calculateNormal,
             Vector2 uv0, Vector2 uv1, Vector2 uv2, Vector2 uv3)
         {
             uv.Add(uv0);
             uv.Add(uv1);
             uv.Add(uv2);
             uv.Add(uv3);
-            return AddQuad(vertex0, vertex1, vertex2, vertex3);
+            return AddQuad(vertex0, vertex1, vertex2, vertex3, calculateNormal);
         }
 
         /// <summary>
-        /// Adds a quad with normals and uv coordinates to the draft
+        /// Adds a quad to the draft
         /// </summary>
         public MeshDraft AddQuad(Vector3 vertex0, Vector3 vertex1, Vector3 vertex2, Vector3 vertex3, Vector3 normal,
             Vector2 uv0, Vector2 uv1, Vector2 uv2, Vector2 uv3)
@@ -244,7 +254,7 @@ namespace ProceduralToolkit
         }
 
         /// <summary>
-        /// Adds a quad with normals and uv coordinates to the draft
+        /// Adds a quad to the draft
         /// </summary>
         public MeshDraft AddQuad(Vector3 vertex0, Vector3 vertex1, Vector3 vertex2, Vector3 vertex3,
             Vector3 normal0, Vector3 normal1, Vector3 normal2, Vector3 normal3,
@@ -255,6 +265,21 @@ namespace ProceduralToolkit
             uv.Add(uv2);
             uv.Add(uv3);
             return AddQuad(vertex0, vertex1, vertex2, vertex3, normal0, normal1, normal2, normal3);
+        }
+
+        private MeshDraft _AddQuad(Vector3 vertex0, Vector3 vertex1, Vector3 vertex2, Vector3 vertex3)
+        {
+            triangles.Add(0 + vertices.Count);
+            triangles.Add(1 + vertices.Count);
+            triangles.Add(2 + vertices.Count);
+            triangles.Add(0 + vertices.Count);
+            triangles.Add(2 + vertices.Count);
+            triangles.Add(3 + vertices.Count);
+            vertices.Add(vertex0);
+            vertices.Add(vertex1);
+            vertices.Add(vertex2);
+            vertices.Add(vertex3);
+            return this;
         }
 
         #endregion AddQuad
@@ -477,17 +502,17 @@ namespace ProceduralToolkit
                 {
                     for (int i = ring.Count - 1; i > 0; i--)
                     {
-                        AddTriangle(ring[i - 1], apex, ring[i], uv00, uvApex, uv10);
+                        AddTriangle(ring[i - 1], apex, ring[i], true, uv00, uvApex, uv10);
                     }
-                    AddTriangle(ring[ring.Count - 1], apex, ring[0], uv00, uvApex, uv10);
+                    AddTriangle(ring[ring.Count - 1], apex, ring[0], true, uv00, uvApex, uv10);
                 }
                 else
                 {
                     for (var i = 0; i < ring.Count - 1; i++)
                     {
-                        AddTriangle(ring[i + 1], apex, ring[i], uv00, uvApex, uv10);
+                        AddTriangle(ring[i + 1], apex, ring[i], true, uv00, uvApex, uv10);
                     }
-                    AddTriangle(ring[0], apex, ring[ring.Count - 1], uv00, uvApex, uv10);
+                    AddTriangle(ring[0], apex, ring[ring.Count - 1], true, uv00, uvApex, uv10);
                 }
             }
             else
@@ -496,17 +521,17 @@ namespace ProceduralToolkit
                 {
                     for (int i = ring.Count - 1; i > 0; i--)
                     {
-                        AddTriangle(ring[i - 1], apex, ring[i]);
+                        AddTriangle(ring[i - 1], apex, ring[i], true);
                     }
-                    AddTriangle(ring[ring.Count - 1], apex, ring[0]);
+                    AddTriangle(ring[ring.Count - 1], apex, ring[0], true);
                 }
                 else
                 {
                     for (var i = 0; i < ring.Count - 1; i++)
                     {
-                        AddTriangle(ring[i + 1], apex, ring[i]);
+                        AddTriangle(ring[i + 1], apex, ring[i], true);
                     }
-                    AddTriangle(ring[0], apex, ring[ring.Count - 1]);
+                    AddTriangle(ring[0], apex, ring[ring.Count - 1], true);
                 }
             }
             return this;
@@ -546,13 +571,13 @@ namespace ProceduralToolkit
                 upper1 = upperRing[i + 1];
                 if (generateUV)
                 {
-                    AddTriangle(lower1, upper0, lower0, uv00, uvTopCenter, uv10);
-                    AddTriangle(lower1, upper1, upper0, uvBottomCenter, uv01, uv11);
+                    AddTriangle(lower1, upper0, lower0, true, uv00, uvTopCenter, uv10);
+                    AddTriangle(lower1, upper1, upper0, true, uvBottomCenter, uv01, uv11);
                 }
                 else
                 {
-                    AddTriangle(lower1, upper0, lower0);
-                    AddTriangle(lower1, upper1, upper0);
+                    AddTriangle(lower1, upper0, lower0, true);
+                    AddTriangle(lower1, upper1, upper0, true);
                 }
             }
 
@@ -562,13 +587,13 @@ namespace ProceduralToolkit
             upper1 = upperRing[0];
             if (generateUV)
             {
-                AddTriangle(lower1, upper0, lower0, uv00, uvTopCenter, uv10);
-                AddTriangle(lower1, upper1, upper0, uvBottomCenter, uv01, uv11);
+                AddTriangle(lower1, upper0, lower0, true, uv00, uvTopCenter, uv10);
+                AddTriangle(lower1, upper1, upper0, true, uvBottomCenter, uv01, uv11);
             }
             else
             {
-                AddTriangle(lower1, upper0, lower0);
-                AddTriangle(lower1, upper1, upper0);
+                AddTriangle(lower1, upper0, lower0, true);
+                AddTriangle(lower1, upper1, upper0, true);
             }
             return this;
         }
@@ -605,11 +630,11 @@ namespace ProceduralToolkit
                 upper1 = upperRing[i + 1];
                 if (generateUV)
                 {
-                    AddQuad(lower1, upper1, upper0, lower0, uv00, uv01, uv11, uv10);
+                    AddQuad(lower1, upper1, upper0, lower0, true, uv00, uv01, uv11, uv10);
                 }
                 else
                 {
-                    AddQuad(lower1, upper1, upper0, lower0);
+                    AddQuad(lower1, upper1, upper0, lower0, true);
                 }
             }
 
@@ -619,11 +644,11 @@ namespace ProceduralToolkit
             upper1 = upperRing[0];
             if (generateUV)
             {
-                AddQuad(lower1, upper1, upper0, lower0, uv00, uv01, uv11, uv10);
+                AddQuad(lower1, upper1, upper0, lower0, true, uv00, uv01, uv11, uv10);
             }
             else
             {
-                AddQuad(lower1, upper1, upper0, lower0);
+                AddQuad(lower1, upper1, upper0, lower0, true);
             }
             return this;
         }
@@ -821,35 +846,52 @@ namespace ProceduralToolkit
         /// <summary>
         /// Creates a new mesh from the data in the draft
         /// </summary>
-        public Mesh ToMesh()
+        /// <param name="calculateBounds"> Calculate the bounding box of the Mesh after setting the triangles. </param>
+        /// <param name="autoIndexFormat"> Use 16 bit or 32 bit index buffers based on vertex count. </param>
+        public Mesh ToMesh(bool calculateBounds = true, bool autoIndexFormat = true)
         {
             var mesh = new Mesh();
-            FillMesh(ref mesh);
+            FillMesh(ref mesh, calculateBounds, autoIndexFormat);
             return mesh;
         }
 
         /// <summary>
         /// Fills the <paramref name="mesh"/> with the data in the draft
         /// </summary>
-        public void ToMesh(ref Mesh mesh)
+        /// <param name="mesh"> Resulting mesh. Cleared before use. </param>
+        /// <param name="calculateBounds"> Calculate the bounding box of the Mesh after setting the triangles. </param>
+        /// <param name="autoIndexFormat"> Use 16 bit or 32 bit index buffers based on vertex count. </param>
+        public void ToMesh(ref Mesh mesh, bool calculateBounds = true, bool autoIndexFormat = true)
         {
             if (mesh == null)
             {
                 throw new ArgumentNullException("mesh");
             }
             mesh.Clear(false);
-            FillMesh(ref mesh);
+            FillMesh(ref mesh, calculateBounds, autoIndexFormat);
         }
 
-        private void FillMesh(ref Mesh mesh)
+        private void FillMesh(ref Mesh mesh, bool calculateBounds, bool autoIndexFormat)
         {
-            if (vertexCount > 65000)
+            if (vertexCount > 65535)
             {
-                Debug.LogError("A mesh may not have more than 65000 vertices. Vertex count: " + vertexCount);
+                if (autoIndexFormat)
+                {
+                    mesh.indexFormat = IndexFormat.UInt32;
+                }
+                else
+                {
+                    Debug.LogError("A mesh can't have more than 65535 vertices with 16 bit index buffer. Vertex count: " + vertexCount);
+                    mesh.indexFormat = IndexFormat.UInt16;
+                }
+            }
+            else
+            {
+                mesh.indexFormat = IndexFormat.UInt16;
             }
             mesh.name = name;
             mesh.SetVertices(vertices);
-            mesh.SetTriangles(triangles, 0);
+            mesh.SetTriangles(triangles, 0, calculateBounds);
             mesh.SetNormals(normals);
             mesh.SetTangents(tangents);
             mesh.SetUVs(0, uv);

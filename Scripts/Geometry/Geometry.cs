@@ -56,7 +56,7 @@ namespace ProceduralToolkit
             var points = new List<Vector2>(count);
             for (int i = 0; i < count; i++)
             {
-                // The 0.5 offset impoves the position of the first point
+                // The 0.5 offset improves the position of the first point
                 float r = Mathf.Sqrt((i + 0.5f)/count);
                 points.Add(new Vector2(radius*Mathf.Sin(currentAngle)*r, radius*Mathf.Cos(currentAngle)*r));
                 currentAngle += PTUtils.GoldenAngle;
@@ -93,7 +93,7 @@ namespace ProceduralToolkit
         /// </summary>
         /// <param name="radius">Circle radius</param>
         /// <param name="count">Number of points</param>
-        public static List<Vector2> PointsInCircle3XY(float radius, int count)
+        public static List<Vector3> PointsInCircle3XY(float radius, int count)
         {
             return PointsInCircle3(0, 1, radius, count);
         }
@@ -123,7 +123,7 @@ namespace ProceduralToolkit
         /// </summary>
         /// <param name="radius">Circle radius</param>
         /// <param name="count">Number of points</param>
-        public static List<Vector2> PointsInCircle3XZ(float radius, int count)
+        public static List<Vector3> PointsInCircle3XZ(float radius, int count)
         {
             return PointsInCircle3(0, 2, radius, count);
         }
@@ -153,7 +153,7 @@ namespace ProceduralToolkit
         /// </summary>
         /// <param name="radius">Circle radius</param>
         /// <param name="count">Number of points</param>
-        public static List<Vector2> PointsInCircle3YZ(float radius, int count)
+        public static List<Vector3> PointsInCircle3YZ(float radius, int count)
         {
             return PointsInCircle3(1, 2, radius, count);
         }
@@ -180,13 +180,13 @@ namespace ProceduralToolkit
             return points;
         }
 
-        private static List<Vector2> PointsInCircle3(int xIndex, int yIndex, float radius, int count)
+        private static List<Vector3> PointsInCircle3(int xIndex, int yIndex, float radius, int count)
         {
             float currentAngle = 0;
-            var points = new List<Vector2>(count);
+            var points = new List<Vector3>(count);
             for (int i = 0; i < count; i++)
             {
-                // The 0.5 offset impoves the position of the first point
+                // The 0.5 offset improves the position of the first point
                 float r = Mathf.Sqrt((i + 0.5f)/count);
                 var point = new Vector3();
                 point[xIndex] = radius*Mathf.Sin(currentAngle)*r;
@@ -305,6 +305,19 @@ namespace ProceduralToolkit
         }
 
         /// <summary>
+        /// Returns the value of an angle. Assumes clockwise order of the polygon.
+        /// </summary>
+        /// <param name="previous">Previous vertex</param>
+        /// <param name="current">Current vertex</param>
+        /// <param name="next">Next vertex</param>
+        public static float GetAngle(Vector2 previous, Vector2 current, Vector2 next)
+        {
+            Vector2 toPrevious = (previous - current).normalized;
+            Vector2 toNext = (next - current).normalized;
+            return VectorE.Angle360(toNext, toPrevious);
+        }
+
+        /// <summary>
         /// Returns the bisector of an angle. Assumes clockwise order of the polygon.
         /// </summary>
         /// <param name="previous">Previous vertex</param>
@@ -406,6 +419,38 @@ namespace ProceduralToolkit
         public static float GetAngleBisectorSin(float angle)
         {
             return Mathf.Sin(angle*Mathf.Deg2Rad/2);
+        }
+
+        /// <summary>
+        /// Calculates a bounding rect for a set of vertices.
+        /// </summary>
+        public static Rect GetRect(IList<Vector2> vertices)
+        {
+            Vector2 min = vertices[0];
+            Vector2 max = vertices[0];
+            for (var i = 1; i < vertices.Count; i++)
+            {
+                var vertex = vertices[i];
+                min = Vector2.Min(min, vertex);
+                max = Vector2.Max(max, vertex);
+            }
+            return Rect.MinMaxRect(min.x, min.y, max.x, max.y);
+        }
+
+        /// <summary>
+        /// Calculates a circumradius for a rectangle.
+        /// </summary>
+        public static float GetCircumradius(Rect rect)
+        {
+            return GetCircumradius(rect.width, rect.height);
+        }
+
+        /// <summary>
+        /// Calculates a circumradius for a rectangle.
+        /// </summary>
+        public static float GetCircumradius(float width, float height)
+        {
+            return Mathf.Sqrt(width/2*width/2 + height/2*height/2);
         }
     }
 }

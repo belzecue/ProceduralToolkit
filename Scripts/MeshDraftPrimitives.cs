@@ -29,17 +29,17 @@ namespace ProceduralToolkit
                 var uv0 = new Vector2(0, 0);
                 var uv1 = new Vector2(0.5f, 1);
                 var uv2 = new Vector2(1, 0);
-                draft.AddTriangle(vertex2, vertex0, vertex1, uv0, uv1, uv2)
-                    .AddTriangle(vertex2, vertex1, vertex3, uv0, uv1, uv2)
-                    .AddTriangle(vertex3, vertex0, vertex2, uv0, uv1, uv2)
-                    .AddTriangle(vertex1, vertex0, vertex3, uv0, uv1, uv2);
+                draft.AddTriangle(vertex2, vertex0, vertex1, true, uv0, uv1, uv2)
+                    .AddTriangle(vertex2, vertex1, vertex3, true, uv0, uv1, uv2)
+                    .AddTriangle(vertex3, vertex0, vertex2, true, uv0, uv1, uv2)
+                    .AddTriangle(vertex1, vertex0, vertex3, true, uv0, uv1, uv2);
             }
             else
             {
-                draft.AddTriangle(vertex2, vertex0, vertex1)
-                    .AddTriangle(vertex2, vertex1, vertex3)
-                    .AddTriangle(vertex3, vertex0, vertex2)
-                    .AddTriangle(vertex1, vertex0, vertex3);
+                draft.AddTriangle(vertex2, vertex0, vertex1, true)
+                    .AddTriangle(vertex2, vertex1, vertex3, true)
+                    .AddTriangle(vertex3, vertex0, vertex2, true)
+                    .AddTriangle(vertex1, vertex0, vertex3, true);
             }
             return draft;
         }
@@ -185,11 +185,11 @@ namespace ProceduralToolkit
             var draft = new MeshDraft {name = "Quad"};
             if (generateUV)
             {
-                draft.AddQuad(origin, width, height, new Vector2(0, 0), new Vector2(0, 1), new Vector2(1, 1), new Vector2(1, 0));
+                draft.AddQuad(origin, width, height, true, new Vector2(0, 0), new Vector2(0, 1), new Vector2(1, 1), new Vector2(1, 0));
             }
             else
             {
-                draft.AddQuad(origin, width, height);
+                draft.AddQuad(origin, width, height, true);
             }
             return draft;
         }
@@ -202,11 +202,11 @@ namespace ProceduralToolkit
             var draft = new MeshDraft {name = "Quad"};
             if (generateUV)
             {
-                draft.AddQuad(vertex0, vertex1, vertex2, vertex3, new Vector2(0, 0), new Vector2(0, 1), new Vector2(1, 1), new Vector2(1, 0));
+                draft.AddQuad(vertex0, vertex1, vertex2, vertex3, true, new Vector2(0, 0), new Vector2(0, 1), new Vector2(1, 1), new Vector2(1, 0));
             }
             else
             {
-                draft.AddQuad(vertex0, vertex1, vertex2, vertex3);
+                draft.AddQuad(vertex0, vertex1, vertex2, vertex3, true);
             }
             return draft;
         }
@@ -412,6 +412,7 @@ namespace ProceduralToolkit
             {
                 draft.AddTriangleFan(lowerRing, Vector3.down, true);
                 draft.AddTriangleFan(upperRing, Vector3.up);
+                draft.AddTriangleStrip(strip, stripNormals);
             }
             return draft;
         }
@@ -524,7 +525,7 @@ namespace ProceduralToolkit
                     Vector2 uv01 = upperRingUV[x + 1];
                     Vector2 uv11 = upperRingUV[x];
                     Vector2 uv10 = lowerRingUV[x];
-                    draft.AddQuad(v00, v01, v11, v10, uv00, uv01, uv11, uv10);
+                    draft.AddQuad(v00, v01, v11, v10, true, uv00, uv01, uv11, uv10);
                 }
             }
             return draft;
@@ -620,16 +621,16 @@ namespace ProceduralToolkit
         /// <summary>
         /// Constructs a partial box with specified faces
         /// </summary>
-        public static MeshDraft PartialBox(Vector3 width, Vector3 length, Vector3 height, Directions parts, bool generateUV = true)
+        public static MeshDraft PartialBox(Vector3 width, Vector3 depth, Vector3 height, Directions parts, bool generateUV = true)
         {
-            Vector3 v000 = -width/2 - length/2 - height/2;
+            Vector3 v000 = -width/2 - depth/2 - height/2;
             Vector3 v001 = v000 + height;
             Vector3 v010 = v000 + width;
             Vector3 v011 = v000 + width + height;
-            Vector3 v100 = v000 + length;
-            Vector3 v101 = v000 + length + height;
-            Vector3 v110 = v000 + width + length;
-            Vector3 v111 = v000 + width + length + height;
+            Vector3 v100 = v000 + depth;
+            Vector3 v101 = v000 + depth + height;
+            Vector3 v110 = v000 + width + depth;
+            Vector3 v111 = v000 + width + depth + height;
 
             var draft = new MeshDraft {name = "Partial box"};
 
@@ -640,23 +641,155 @@ namespace ProceduralToolkit
                 Vector2 uv2 = new Vector2(1, 1);
                 Vector2 uv3 = new Vector2(1, 0);
 
-                if (parts.HasFlag(Directions.Left)) draft.AddQuad(v100, v101, v001, v000, Vector3.left, uv0, uv1, uv2, uv3);
-                if (parts.HasFlag(Directions.Right)) draft.AddQuad(v010, v011, v111, v110, Vector3.right, uv0, uv1, uv2, uv3);
-                if (parts.HasFlag(Directions.Down)) draft.AddQuad(v010, v110, v100, v000, Vector3.down, uv0, uv1, uv2, uv3);
-                if (parts.HasFlag(Directions.Up)) draft.AddQuad(v111, v011, v001, v101, Vector3.up, uv0, uv1, uv2, uv3);
-                if (parts.HasFlag(Directions.Back)) draft.AddQuad(v000, v001, v011, v010, Vector3.back, uv0, uv1, uv2, uv3);
-                if (parts.HasFlag(Directions.Forward)) draft.AddQuad(v110, v111, v101, v100, Vector3.forward, uv0, uv1, uv2, uv3);
+                if (parts.HasFlag(Directions.Left)) draft.AddQuad(v100, v101, v001, v000, true, uv0, uv1, uv2, uv3);
+                if (parts.HasFlag(Directions.Right)) draft.AddQuad(v010, v011, v111, v110, true, uv0, uv1, uv2, uv3);
+                if (parts.HasFlag(Directions.Down)) draft.AddQuad(v010, v110, v100, v000, true, uv0, uv1, uv2, uv3);
+                if (parts.HasFlag(Directions.Up)) draft.AddQuad(v111, v011, v001, v101, true, uv0, uv1, uv2, uv3);
+                if (parts.HasFlag(Directions.Back)) draft.AddQuad(v000, v001, v011, v010, true, uv0, uv1, uv2, uv3);
+                if (parts.HasFlag(Directions.Forward)) draft.AddQuad(v110, v111, v101, v100, true, uv0, uv1, uv2, uv3);
             }
             else
             {
-                if (parts.HasFlag(Directions.Left)) draft.AddQuad(v100, v101, v001, v000, Vector3.left);
-                if (parts.HasFlag(Directions.Right)) draft.AddQuad(v010, v011, v111, v110, Vector3.right);
-                if (parts.HasFlag(Directions.Down)) draft.AddQuad(v010, v110, v100, v000, Vector3.down);
-                if (parts.HasFlag(Directions.Up)) draft.AddQuad(v111, v011, v001, v101, Vector3.up);
-                if (parts.HasFlag(Directions.Back)) draft.AddQuad(v000, v001, v011, v010, Vector3.back);
-                if (parts.HasFlag(Directions.Forward)) draft.AddQuad(v110, v111, v101, v100, Vector3.forward);
+                if (parts.HasFlag(Directions.Left)) draft.AddQuad(v100, v101, v001, v000, true);
+                if (parts.HasFlag(Directions.Right)) draft.AddQuad(v010, v011, v111, v110, true);
+                if (parts.HasFlag(Directions.Down)) draft.AddQuad(v010, v110, v100, v000, true);
+                if (parts.HasFlag(Directions.Up)) draft.AddQuad(v111, v011, v001, v101, true);
+                if (parts.HasFlag(Directions.Back)) draft.AddQuad(v000, v001, v011, v010, true);
+                if (parts.HasFlag(Directions.Forward)) draft.AddQuad(v110, v111, v101, v100, true);
             }
             return draft;
+        }
+
+        /// <summary>
+        /// Constructs a capsule draft
+        /// </summary>
+        /// <param name="height">The height of the capsule</param>
+        /// <param name="radius">The radius of the capsule</param>
+        /// <param name="segments">The number of radial segments. Defaults to 32</param>
+        /// <param name="rings">The number of end-cap rings. Defaults to 8</param>
+        public static MeshDraft Capsule(float height, float radius, int segments = 32, int rings = 8)
+        {
+            float cylinderHeight = height - radius*2;
+            int vertexCount = 2*rings*segments + 2;
+            int triangleCount = 4*rings*segments;
+            float horizontalAngle = 360f/segments;
+            float verticalAngle = 90f/rings;
+
+            var vertices = new Vector3[vertexCount];
+            var normals = new Vector3[vertexCount];
+            var triangles = new int[3*triangleCount];
+
+            int vi = 2;
+            int ti = 0;
+            int topCapIndex = 0;
+            int bottomCapIndex = 1;
+
+            vertices[topCapIndex].Set(0, cylinderHeight/2 + radius, 0);
+            normals[topCapIndex].Set(0, 1, 0);
+            vertices[bottomCapIndex].Set(0, -cylinderHeight/2 - radius, 0);
+            normals[bottomCapIndex].Set(0, -1, 0);
+
+            for (int s = 0; s < segments; s++)
+            {
+                for (int r = 1; r <= rings; r++)
+                {
+                    // Top cap vertex
+                    Vector3 normal = Geometry.PointOnSphere(1, s*horizontalAngle, 90 - r*verticalAngle);
+                    Vector3 vertex = new Vector3(
+                        x: radius*normal.x,
+                        y: radius*normal.y + cylinderHeight/2,
+                        z: radius*normal.z);
+                    vertices[vi] = vertex;
+                    normals[vi] = normal;
+                    vi++;
+
+                    // Bottom cap vertex
+                    vertices[vi].Set(vertex.x, -vertex.y, vertex.z);
+                    normals[vi].Set(normal.x, -normal.y, normal.z);
+                    vi++;
+
+                    int top_s1r1 = vi - 2;
+                    int top_s1r0 = vi - 4;
+                    int bot_s1r1 = vi - 1;
+                    int bot_s1r0 = vi - 3;
+                    int top_s0r1 = top_s1r1 - 2*rings;
+                    int top_s0r0 = top_s1r0 - 2*rings;
+                    int bot_s0r1 = bot_s1r1 - 2*rings;
+                    int bot_s0r0 = bot_s1r0 - 2*rings;
+                    if (s == 0)
+                    {
+                        top_s0r1 += vertexCount - 2;
+                        top_s0r0 += vertexCount - 2;
+                        bot_s0r1 += vertexCount - 2;
+                        bot_s0r0 += vertexCount - 2;
+                    }
+
+                    // Create cap triangles
+                    if (r == 1)
+                    {
+                        triangles[3*ti + 0] = topCapIndex;
+                        triangles[3*ti + 1] = top_s0r1;
+                        triangles[3*ti + 2] = top_s1r1;
+                        ti++;
+
+                        triangles[3*ti + 0] = bottomCapIndex;
+                        triangles[3*ti + 1] = bot_s1r1;
+                        triangles[3*ti + 2] = bot_s0r1;
+                        ti++;
+                    }
+                    else
+                    {
+                        triangles[3*ti + 0] = top_s1r0;
+                        triangles[3*ti + 1] = top_s0r0;
+                        triangles[3*ti + 2] = top_s1r1;
+                        ti++;
+
+                        triangles[3*ti + 0] = top_s0r0;
+                        triangles[3*ti + 1] = top_s0r1;
+                        triangles[3*ti + 2] = top_s1r1;
+                        ti++;
+
+                        triangles[3*ti + 0] = bot_s0r1;
+                        triangles[3*ti + 1] = bot_s0r0;
+                        triangles[3*ti + 2] = bot_s1r1;
+                        ti++;
+
+                        triangles[3*ti + 0] = bot_s0r0;
+                        triangles[3*ti + 1] = bot_s1r0;
+                        triangles[3*ti + 2] = bot_s1r1;
+                        ti++;
+                    }
+                }
+
+                // Create side triangles
+                int top_s1 = vi - 2;
+                int top_s0 = top_s1 - 2*rings;
+                int bot_s1 = vi - 1;
+                int bot_s0 = bot_s1 - 2*rings;
+                if (s == 0)
+                {
+                    top_s0 += vertexCount - 2;
+                    bot_s0 += vertexCount - 2;
+                }
+
+                triangles[3*ti + 0] = top_s0;
+                triangles[3*ti + 1] = bot_s1;
+                triangles[3*ti + 2] = top_s1;
+                ti++;
+
+                triangles[3*ti + 0] = bot_s0;
+                triangles[3*ti + 1] = bot_s1;
+                triangles[3*ti + 2] = top_s0;
+                ti++;
+            }
+
+            return new MeshDraft
+            {
+                name = "Capsule",
+                vertices = new List<Vector3>(vertices),
+                triangles = new List<int>(triangles),
+                normals = new List<Vector3>(normals)
+            };
         }
     }
 }
